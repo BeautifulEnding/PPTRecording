@@ -1,1 +1,2 @@
-include ':app'
+include ':app', ':pptfileprocess', 'selectPicture', 'quickscan'
+include ':opencv_java340'
