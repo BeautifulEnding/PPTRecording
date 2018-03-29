@@ -31,5 +31,6 @@ dependencies {
     compile 'me.shaohui.advancedluban:library:1.3.2'
     compile project(':opencv_java340')
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3'
+    compile 'com.google.code.gson:gson:2.7'
 }
 //apply from: "bintrayUpload.gradle"
