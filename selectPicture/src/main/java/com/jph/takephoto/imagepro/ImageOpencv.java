@@ -4,6 +4,8 @@ package com.jph.takephoto.imagepro;
  * Created by Administrator on 2018/3/22 0022.
  */
 
+import android.util.Log;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -17,70 +19,12 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class ImageOpencv {
-    private static String TAG="MainActivity";
-//    static {
-//        if (OpenCVLoader.initDebug()){
-//            Log.i(TAG,"OPENCV initialize succeed");
-//        }else{
-//            Log.i(TAG,"OPENCV initialize failed");
-//        }
-//    }
-    public static String srcPath="E:\\Android\\PPTRecording\\imagepro\\src\\main\\res\\drawable\\test.jpg";
-    public static String objPath="E:\\Android\\PPTRecording\\TestResultPicture\\";
-
-//    //OpenCV库加载并初始化成功后的回调函数
-//    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-//
-//        @Override
-//        public void onManagerConnected(int status) {
-//            // TODO Auto-generated method stub
-//            switch (status){
-//                case BaseLoaderCallback.SUCCESS:
-//                    Log.i(TAG, "成功加载");
-//                    break;
-//                default:
-//                    super.onManagerConnected(status);
-//                    Log.i(TAG, "加载失败");
-//                    break;
-//            }
-//
-//        }
-//    };
-
-//    public static void main(String[] args) {
-//        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-//        Mat src = Imgcodecs.imread(srcPath);
-//        Imgcodecs.imwrite(objPath+"test1.jpg", removeBackground(src));
-//
-//        Mat src2 = Imgcodecs.imread(srcPath);
-//        Imgcodecs.imwrite(objPath+"test2.jpg", MyThresholdHsv(src2));
-//
-//
-//        Mat src3 = Imgcodecs.imread(srcPath);
-//        Imgcodecs.imwrite(objPath+"test3.jpg", myGrabCut(src3,  new Point(50,0),new Point(300, 250)));
-//
-//        Mat src4 = Imgcodecs.imread(srcPath);
-//        Imgcodecs.imwrite(objPath+"test4.jpg", MyFindLargestRectangle(src4));
-//
-//        Mat src5 = Imgcodecs.imread(srcPath);
-//        Imgcodecs.imwrite(objPath+"test5.jpg", MyWatershed(src5));
-//
-//        Mat src6 = Imgcodecs.imread(srcPath);
-//        Imgcodecs.imwrite(objPath+"test6.jpg", MyCanny(src6, 100));
-
-//        SkinDetection sd= new SkinDetection(Imgcodecs.imread("E:/work/qqq/e1.jpg"));
-//        Imgcodecs.imwrite("E:/work/qqq/hh7.jpg",sd.GetSkin());
-
-//        System.out.println("Core.NATIVE_LIBRARY_NAME "+Core.NATIVE_LIBRARY_NAME);
-//        System.out.println("java.library.path "+System.getProperty("java.library.path"));
-//    }
-
     // threshold根据反差去掉深色单色背景
-    public static Mat removeBackground(Mat nat) {
+    private static Mat removeBackground(Mat nat) {
         Mat m = new Mat();
-
         Imgproc.cvtColor(nat, m, Imgproc.COLOR_BGR2GRAY);
         double threshold = Imgproc.threshold(m, m, 0, 255, Imgproc.THRESH_OTSU);
         Mat pre = new Mat(nat.size(), CvType.CV_8UC3, new Scalar(0, 0, 0));
@@ -154,11 +98,12 @@ public class ImageOpencv {
 
     }
     //findContours分割技术
-    private static Mat MyFindLargestRectangle(Mat original_image) {
+    public static Mat MyFindLargestRectangle(Mat original_image) {
         Mat imgSource = original_image;
         Imgproc.cvtColor(imgSource, imgSource, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.Canny(imgSource, imgSource, 50, 50);
-        Imgproc.GaussianBlur(imgSource, imgSource, new Size(5, 5), 5);
+        Imgproc.threshold(imgSource, imgSource, 0, 255, Imgproc.THRESH_BINARY);
+        Imgproc.Canny(imgSource, imgSource, 255, 255);
+//        Imgproc.GaussianBlur(imgSource, imgSource, new Size(5, 5), 5);
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         Imgproc.findContours(imgSource, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
         double maxArea = 0;
@@ -174,15 +119,19 @@ public class ImageOpencv {
                 maxAreaIdx = idx;
                 MatOfPoint2f new_mat = new MatOfPoint2f(temp_contour.toArray());
                 int contourSize = (int) temp_contour.total();
-                Imgproc.approxPolyDP(new_mat, approxCurve, contourSize * 0.05, true);
+//                Imgproc.approxPolyDP(new_mat, approxCurve, contourSize * 0.05, true);
             }
         }
-
-
-        Imgproc.drawContours(imgSource, contours, -1, new Scalar(255, 0, 0), 1);
-        Imgproc.fillConvexPoly(imgSource, largest_contour, new Scalar(255, 255, 255));
-        Imgproc.drawContours(imgSource, contours, maxAreaIdx, new Scalar(0, 0, 255), 3);
-
+        List<Point> pointList=contours.get(maxAreaIdx).toList();
+        for (int i=0;i<pointList.size();i++){
+            Log.e("轮廓提取的点的坐标：",pointList.get(i).x+"   "+pointList.get(i).y);
+        }
+        Log.e("轮廓提取的最大矩形面积： ",maxArea+"");
+//        Imgproc.drawContours(imgSource, contours, -1, new Scalar(255, 0, 0), 1);
+//        Imgproc.fillConvexPoly(imgSource, largest_contour, new Scalar(255, 255, 255));
+//        Imgproc.drawContours(imgSource, contours, maxAreaIdx, new Scalar(0, 0, 255), 3);
+//        Rect rect=new Rect((int) pointList.get(0).x,(int) pointList.get(0).y,(int)maxArea/2,(int)maxArea/2);
+//        Mat image=new Mat(original_image,rect);
         return imgSource;
     }
     //watershed分割技术
@@ -217,5 +166,62 @@ public class ImageOpencv {
         Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
         Imgproc.Canny(img, img, threshold, threshold * 3, 3, true);
         return img;
+    }
+
+    public static Mat findPPTRect(Mat original_image) {
+        Mat srcImge=removeBackground(original_image);
+//        Mat srcImge=MyThresholdHsv(original_image);
+        Mat imgSource = srcImge;
+        Imgproc.cvtColor(imgSource, imgSource, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.Canny(imgSource, imgSource, 255, 255);
+        Mat lines=new Mat();
+        Imgproc.HoughLinesP(imgSource,lines,1,Math.PI/180,80,100,20);
+        double minX=20000,minY=20000,maxX=-1,maxY=-1;
+        for (int y=0;y<lines.rows();y++)
+        {
+            double[] vec = lines.get(y, 0);
+
+            double  x1 = vec[0],
+                    y1 = vec[1],
+                    x2 = vec[2],
+                    y2 = vec[3];
+            if (x1>maxX){
+                maxX=x1;
+            }
+            if (x2>maxX){
+                maxX=x2;
+            }
+            if (x1<minX){
+                minX=x1;
+            }
+            if (x2<minX){
+                minX=x2;
+            }
+            if (y1<minY){
+                minY=y1;
+            }
+            if (y2<minY){
+                minY=y2;
+            }
+            if (y1>maxY){
+                maxY=y1;
+            }
+            if (y2>maxY){
+                maxY=y2;
+            }
+//            Point start = new Point(x1, y1);
+//            Point end = new Point(x2, y2);
+//            Imgproc.line(original_image, start, end, new Scalar(255,0,0), 2);
+        }
+//        Log.e("minX minY maxX maxY",minX+"  "+minY+"  "+maxX+"  "+maxY);
+//        Log.e("row col ",original_image.rows()+"  "+original_image.cols());
+        int width=(int)(maxY-minY);
+        int height=(int)(maxX-minX);
+        if(original_image.cols()-1-minX<width||original_image.rows()-1-minY<height)
+            return original_image;
+        Rect rect=new Rect((int)minX,(int)minY,height,width);
+        Mat objMat=new Mat(original_image,rect);
+        return objMat;
+//        return original_image;
     }
 }
