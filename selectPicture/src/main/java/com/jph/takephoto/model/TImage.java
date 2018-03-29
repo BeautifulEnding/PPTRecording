@@ -1,21 +1,20 @@
 package com.jph.takephoto.model;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.text.TextUtils;
+
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 
-/**
- * TakePhoto 操作成功返回的处理结果
- *
- * Author: JPH
- * Date: 2016/8/11 17:01
- */
 public class TImage implements Serializable{
     private String originalPath;
     private String compressPath;
     private FromType fromType;
     private boolean cropped;
     private boolean compressed;
+//    private Bitmap objBitmap;
     public static TImage of(String path, FromType fromType){
         return new TImage(path, fromType);
     }
@@ -30,7 +29,15 @@ public class TImage implements Serializable{
         this.originalPath = uri.getPath();
         this.fromType = fromType;
     }
-
+    private TImage(String originalPath){
+        this.originalPath = originalPath;
+    }
+//    public Bitmap getObjBitmap(){
+//        return objBitmap;
+//    }
+//    public void setObjBitmap(Bitmap bitmap){
+//        this.objBitmap=bitmap;
+//    }
     public String getOriginalPath() {
         return originalPath;
     }
@@ -73,5 +80,14 @@ public class TImage implements Serializable{
     //图片来自相机还是其他的路径
     public enum FromType {
         CAMERA, OTHER
+    }
+
+    public static TImage parse(String jsonString) {
+//        将json字符串转化成ContentList对象
+        if (TextUtils.isEmpty(jsonString)) {
+            return null;
+        }
+        TImage image = new Gson().fromJson(jsonString,TImage.class);
+        return image;
     }
 }
