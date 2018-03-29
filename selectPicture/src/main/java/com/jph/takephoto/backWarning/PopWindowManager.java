@@ -3,23 +3,18 @@ package com.jph.takephoto.backWarning;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jph.takephoto.R;
 import com.jph.takephoto.constant.Constant;
-import com.jph.takephoto.imagepro.ImageProTask;
-import com.jph.takephoto.model.TResult;
 import com.jph.takephoto.util.ScreenUtil;
 
 /**
@@ -27,30 +22,18 @@ import com.jph.takephoto.util.ScreenUtil;
  */
 
 public class PopWindowManager {
+    public static int pop=0;
     private static Context mContext;
     private static View rootView;
     private static TextView processView;
-    private static Handler updateProcessHandler=new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-//            在这里处理popWindow中的进度和Notification中的进度
-            switch (msg.what){
-                case Constant.TEST_MESSAGE:
-//                    测试消息
-                    if (processView!=null){
-                        processView.append("成功");
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-    public static Handler initPopWindow(final Context context, View view) {
+    private static int process;
+    private static PopupWindow popupWindow;
+    public static PopupWindow initPopWindow(Context context, View view) {
+        pop=1;
         mContext = context;
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(mContext.LAYOUT_INFLATER_SERVICE);
         rootView = inflater.inflate(R.layout.popup, null);
-        final PopupWindow popupWindow = new PopupWindow(rootView, ScreenUtil.getScreenWidth(mContext),
+        popupWindow = new PopupWindow(rootView, ScreenUtil.getScreenWidth(mContext),
                 ScreenUtil.getScreenHeight(mContext));
         popupWindow.setFocusable(true);
 //        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg,null));
@@ -58,7 +41,12 @@ public class PopWindowManager {
         popupWindow.setOutsideTouchable(true);
         popupWindow.setAnimationStyle(R.style.popwin_anim_style);
         popupWindow.update();
-        popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+        if (view!=null){
+            popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+        }else {
+            Toast.makeText(context,"popWindow的父view为空",Toast.LENGTH_SHORT).show();
+            popupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
+        }
         darkenBackground(0.2f);
         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
@@ -69,16 +57,24 @@ public class PopWindowManager {
         ProgressBar bar = (ProgressBar) rootView.findViewById(R.id.progressBar);
 
         processView = (TextView) rootView.findViewById(R.id.process_text);
+        process=NotificationHelper.getProcess();
+        processView.setText("");
+        if (process>0 && process<100){
+            processView.setText(Constant.CURRENT_PROCESS_TIPS+process+"%");
+        }else{
+            processView.setText(Constant.CURRENT_PROCESS_TIPS+"0%");
+        }
         Button backButton = (Button) rootView.findViewById(R.id.button_back);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //不管popWindow在不在，图像处理都已经开始了。
-                NotificationManager.showNotification(context,10,view);
-//                popupWindow.dismiss();
+                NotificationHelper.showNotification(mContext);
+                pop=0;
+                popupWindow.dismiss();
             }
         });
-        return updateProcessHandler;
+      return popupWindow;
     }
 
     public static void darkenBackground(Float bgcolor){
@@ -87,5 +83,9 @@ public class PopWindowManager {
         ((Activity)mContext).getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         ((Activity)mContext).getWindow().setAttributes(lp);
 
+    }
+
+    public static TextView getProcessView(){
+        return processView;
     }
 }
