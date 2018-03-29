@@ -1,22 +1,11 @@
 package com.jph.takephoto.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.jph.takephoto.R;
-import com.jph.takephoto.backWarning.PopWindowManager;
-import com.jph.takephoto.constant.Constant;
-import com.jph.takephoto.imagepro.ImageProTask;
-import com.jph.takephoto.imagepro.ImageProThread;
 import com.jph.takephoto.model.InvokeParam;
 import com.jph.takephoto.model.TContextWrap;
 import com.jph.takephoto.model.TResult;
@@ -30,9 +19,11 @@ public class TakePhotoActivity extends IndexActivity implements TakePhoto.TakeRe
     private Context context;
     private TakePhoto takePhoto;
     private InvokeParam invokeParam;
-    private TResult resultPhoto;
-    private View relativeView;
-    private Handler uiHandler;
+//    private TResult resultPhoto;
+//    private View relativeView;
+//    private Handler uiHandler;
+//    图像处理线程
+//    private ImageProThread task;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getTakePhoto().onCreate(savedInstanceState);
@@ -69,20 +60,7 @@ public class TakePhotoActivity extends IndexActivity implements TakePhoto.TakeRe
     }
     @Override
     public void takeSuccess(TResult result) {
-//        Toast.makeText(TakePhotoActivity.this,"原路径 "+result.getImage().getOriginalPath(),Toast.LENGTH_SHORT).show();
-//      压缩后路径为空
-//  Toast.makeText(TakePhotoActivity.this,"压缩后的路径 "+result.getImage().getCompressPath(),Toast.LENGTH_SHORT).show();
-//        Log.i(TAG,"takeSuccess：" + result.getImage().getCompressPath());
-        resultPhoto=result;
-        if (result!=null){
-            //                imageProManager=new ImageProManagerImp();
-////                让图像处理模块负责分割图片并进行相关显示
-//                imageProManager.imagePro(resultImage);
-            uiHandler=PopWindowManager.initPopWindow(context,relativeView);
-            //                解除popWindow,转入后台进行图片处理，图片处理工作都在ImageProTask中异步执行
-            ImageProThread task=new ImageProThread(uiHandler);
-            task.start();
-        }
+
     }
     @Override
     public void takeFail(TResult result,String msg) {
@@ -101,10 +79,13 @@ public class TakePhotoActivity extends IndexActivity implements TakePhoto.TakeRe
         }
         return type;
     }
-    public TResult getTResult(){
-        return resultPhoto;
-    }
-    public void setRelativeView(View view){
-        relativeView=view;
-    }
+//    public TResult getTResult(){
+//        return resultPhoto;
+//    }
+//    public void setRelativeView(View view){
+//        relativeView=view;
+//    }
+//    public ImageProThread getImageProThread(){
+//        return task;
+//    }
 }
