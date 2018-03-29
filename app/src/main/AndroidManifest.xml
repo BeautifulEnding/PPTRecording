@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.administrator.pptrecording">
-
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ppt"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -19,8 +19,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".TestActivity">
-
         </activity>
+        <receiver android:name="com.jph.takephoto.backWarning.NotificationClickReceiver">
+            <intent-filter>
+                <action android:name="click.notification" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
