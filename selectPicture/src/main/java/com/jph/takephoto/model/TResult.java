@@ -1,15 +1,15 @@
 package com.jph.takephoto.model;
 
-import java.util.ArrayList;
+import android.text.TextUtils;
 
-/**
- * TakePhoto 操作成功返回的处理结果
- * Author: JPH
- * Date: 2016/8/11 17:01
- */
-public class TResult {
+import com.google.gson.Gson;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+public class TResult implements Serializable{
     private  ArrayList<TImage> images;
     private TImage image;
+//    private String savePaths;
     public static TResult of(TImage image){
         ArrayList<TImage> images=new ArrayList<>(1);
         images.add(image);
@@ -22,7 +22,12 @@ public class TResult {
         this.images = images;
         if(images!=null&&!images.isEmpty())this.image=images.get(0);
     }
-
+//    public String getSavePaths(){
+//        return savePaths;
+//    }
+//    public void setSavePaths(String paths){
+//        this.savePaths=paths;
+//    }
     public ArrayList<TImage> getImages() {
         return images;
     }
@@ -37,5 +42,14 @@ public class TResult {
 
     public void setImage(TImage image) {
         this.image = image;
+    }
+
+    public static TResult parse(String jsonString) {
+//        将json字符串转化成ContentList对象
+        if (TextUtils.isEmpty(jsonString)) {
+            return null;
+        }
+        TResult result = new Gson().fromJson(jsonString,TResult.class);
+        return result;
     }
 }
