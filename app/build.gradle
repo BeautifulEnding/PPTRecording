@@ -34,4 +34,5 @@ dependencies {
     compile 'com.android.support:design:26.+'
     testCompile 'junit:junit:4.12'
     compile project(':selectPicture')
+    compile 'com.google.code.gson:gson:2.7'
 }
